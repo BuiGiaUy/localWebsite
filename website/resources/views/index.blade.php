@@ -3,14 +3,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>Danh sách Chủ đề</h1>
-    <ul>
-        @foreach ($topics as $topic)
-            <li>
-                <a href="{{ route('forum.topic', $topic->TopicID) }}">{{ $topic->Title }}</a> -
-                {{ $topic->CategoryName }} ({{ $topic->Username }}) -
-                {{ $topic->CreatedAt }}
-            </li>
-        @endforeach
-    </ul>
+    <h1 class="text-3xl font-bold underline">
+        Hello world!
+    </h1>
 @endsection
