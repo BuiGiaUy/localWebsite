@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,5 +20,8 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::group(['prefix' => 'chat-room'], function () {
+    Route::get('/', [ChatController::class, 'index'])->name('room.index');
+    Route::post('/create-room', [ChatController::class, 'storeRoom'])->name('room.store');
+    Route::post('/search/', [ChatController::class, 'search'])->name('room.search');
+});
