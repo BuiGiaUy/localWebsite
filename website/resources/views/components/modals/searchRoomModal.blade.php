@@ -2,7 +2,7 @@
     <div class="absolute top-0 left-0 h-screen w-full opacity-50 bg-black">
     </div>
     <div class="absolute top-0 left-0 h-screen w-full flex justify-center">
-        <div class=" w-1/3 self-top p-3 relative">
+        <div class=" w-1/3 self-top p-4 relative">
             <div class="w-full h-full  bg-white rounded-lg">
                 <form id="searchRoomForm" class="py-6 px-8">
                     @csrf
@@ -26,22 +26,22 @@
                 <div class="w-full pb-6 px-8">
                     <p class="font-semibold">Rooms</p>
                     <div class="w-full" id="search_room_result">
-                        @foreach($rooms as $room)
-                            <a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2">
-                                <div class="flex justify-start items-center gap-4">
-                                    <div class="w-8 h-8 rounded-full">
-                                        <img src="{{asset($room->icon ?? 'images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
-                                    </div>
-                                    <p class="font-bold text-white">{{$room->name}}</p>
-                                </div>
+{{--                          @foreach($rooms as $room)--}}
+{{--                              <a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2">--}}
+{{--                                  <div class="flex justify-start items-center gap-4">--}}
+{{--                                      <div class="w-8 h-8 rounded-full">--}}
+{{--                                          <img src="{{asset($room->icon ?? 'images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />--}}
+{{--                                      </div>--}}
+{{--                                      <p class="font-bold text-white">{{$room->name}}</p>--}}
+{{--                                  </div>--}}
 
-                                <div class="">
-                                    <button class="text-white hover:text-orange-500 text-xl">
-                                        <i class="fa-solid fa-right-to-bracket"></i>
-                                    </button>
-                                </div>
-                            </a>
-                        @endforeach
+{{--                                  <div class="">--}}
+{{--                                      <button type="button" class="text-white hover:text-orange-500 text-xl" onclick="sendJoinRoomRequest('{{$room->id}}')">--}}
+{{--                                          <i class="fa-solid fa-right-to-bracket"></i>--}}
+{{--                                      </button>--}}
+{{--                                  </div>--}}
+{{--                              </a>--}}
+{{--                          @endforeach--}}
                     </div>
                 </div>
             </div>
@@ -54,38 +54,82 @@
     </div>
 </div>
 
+
+<!-- Import CDN jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Call Ajax handle -->
 <script>
-    $(document).ready(function() {
-        $('#searchRoomModal').on('input', function (){
-            $.ajax({
-                type: 'POST',
-                url: '{{route("room.search")}}',
-                data: $('#searchRoomForm').serialize(),
-                success: function(response){
-                    console.log(response)
-                    let rooms = response;
-                    let html = '';
-                    for(let i =0; i< rooms.length; i++) {
-                        html +=`
-                            <a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2">
+
+    function sendJoinRoomRequest(room_id) {
+        console.log("send join to request:", room_id)
+        $.ajax({
+            type : 'POST',
+            url : '{{ route("room.join") }}',
+            data : {
+                _token: '{{ csrf_token() }}',
+                room_id: room_id,
+            },
+            success: function(response) {
+                turnOnNotification(response.message, "success")
+                const room = response.room;
+
+                if (!room) return
+                const html =`<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                            <div class="col-span-1">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
-                                        <img src="{{asset($room->icon ?? 'images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
+                                    <img src="${room.icon ?? 'images/avatar.jpg'}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
                                     </div>
-                                    <p class="font-bold text-white">{{$room->name}}</p>
+                                    <p class="font-bold">${room.name}</p>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <p> ${room.description}</p>
+                            </div>
+                        </a>`
+                const joinedRoomList = document.getElementById("joined_rooms_list")
+                if (joinedRoomList) joinedRoomList.innerHTML +=html;
+
+                const searchRoomResultElement = document.getElementById("search-room-result-"+room.id);
+                if (searchRoomResultElement) searchRoomResultElement.remove();
+            },
+            error : function (error) {
+                console.log(error)
+                turnOnNotification(error.message, "error");
+            }
+        })
+    }
+    // TODO: Search Room by name
+    $(document).ready(function() {
+        $('#searchRoomForm').on('input', function() {
+            $.ajax({
+                type: 'POST',
+                url: '{{ route("room.search") }}',
+                data: $('#searchRoomForm').serialize(),
+                success: function(response) {
+                    let rooms = response;
+                    let html = '';
+                    for(let i=0; i<rooms.length; i++){
+                        html +=
+                            `<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2" id="search-room-result-${rooms[i].id}">
+                                <div class="flex justify-start items-center gap-4">
+                                    <div class="w-8 h-8 rounded-full">
+                                        <img src="${rooms[i].icon ?? 'images/avatar.jpg'}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
+                                    </div>
+                                    <p class="font-bold text-white">${rooms[i].name}</p>
                                 </div>
 
                                 <div class="">
-                                    <button class="text-white hover:text-orange-500 text-xl">
+                                    <button type="button" class="text-white hover:text-orange-500 text-xl" onclick="sendJoinRoomRequest(${rooms[i].id})">
                                         <i class="fa-solid fa-right-to-bracket"></i>
                                     </button>
                                 </div>
-                            </a>
-                        `
+                            </a>`;
                     }
-                    if(rooms.length === 0) {
-                        html += `<p class="text-red-400 font-semibold text-center">Room not found</p>`
+                    if (rooms.length === 0){
+                        html = `<p class="text-red-400 font-semibold text-center"> Room not found!</p>`;
+
                     }
                     $('#search_room_result').html(html);
 
@@ -93,8 +137,7 @@
                 error: function(error) {
                     console.log(error);
                 }
-
-            })
-        })
-    })
+            });
+        });
+    });
 </script>

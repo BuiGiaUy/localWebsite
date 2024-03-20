@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -24,8 +25,9 @@ class ChatController extends BaseController
      */
     public function index()
     {
-       $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
-       return view('chat.index', ['rooms' => $rooms]);
+//        $joined_rooms = Auth::user()->rooms;
+        $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
+        return view('content.chat.index', ['rooms' => $rooms]);
     }
     public function storeRoom(Request $request) {
         $input = $request->all();
@@ -55,5 +57,20 @@ class ChatController extends BaseController
             $rooms = Room::where('owner_id', '=', Auth::user()->id)->get();
         }
         return response()->json($rooms,200);
+    }
+
+    public function join(Request $request) :JsonResponse
+    {
+        $user = Auth::user();
+        $input = $request->all();
+        $room = Room::find($input['room_id']);
+
+        if ($user && $room)
+        {
+            $room->users()->attach($user->id);
+        }
+        $message = "You have joined the room";
+
+        return response()->json(["message" =>$message, "room"=> $room], 200);
     }
 }
