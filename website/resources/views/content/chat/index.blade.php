@@ -106,50 +106,25 @@
                     </div>
 
                 </form>
-                <div class=" w-full h-full bg-[#212540] flex-grow py-8">
-                    <div class="max-w-md w-full mx-auto">
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                            <!-- Tin nhắn đến -->
-                            <div class="flex items-center p-4 border-b">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full">
-                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                <div class=" w-full h-full  text-white flex-grow py-8">
+                    <div class="w-full" id="rooms_list">
+                        @foreach($rooms as $room)
+                            <div  class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                                <div class="col-span-1">
+                                    <div class="flex justify-start items-center gap-4">
+                                        <div class="w-8 h-8 rounded-full">
+                                            @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                        </div>
+                                        <p class="font-bold">{{$room->name}}</p>
                                     </div>
                                 </div>
-                                <div class="ml-3">
-                                    <div class="text-sm font-semibold">Người gửi 1</div>
-                                    <div class="text-gray-600">Tin nhắn đến từ người gửi 1</div>
+
+                                <div class="absolute top-0 right-0 text-sm mr-2 mt-1  flex justify-end items-center gap-4">
+                                    <p class="text-gray-400">2 min ago</p>
+                                    {{--                                @include('components.countNotification', ['number' => 1])--}}
                                 </div>
                             </div>
-                            <!-- Tin nhắn đi -->
-                            <div class="flex items-center p-4 border-b">
-                                <div class="ml-3 flex-grow text-right pr-2">
-                                    <div class="text-sm font-semibold">Bạn</div>
-                                    <div class="text-gray-600">Tin nhắn của bạn</div>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full">
-                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
-                                    </div>
-                                </div>
-                            </div>
-                            <form id="" class="w-full h-full  flex items-center">
-                                @csrf
-                                <div class="w-full relative">
-                                    <label for="search_room_name"></label>
-                                    <input type="text" name="search_room_name" id="search_room_name" required
-                                           placeholder="search message"
-                                           class="w-full py-1.5 px-4 border border-gray-400 rounded-lg  focus:outline-blue-600 "
-                                           autofocus
-                                    />
-                                    <button type="submit" class="absolute top-0 right-0 self-center h-full mr-4 text-blue-600">
-                                        <i class="fa-solid fa-magnifying-glass"></i>
-                                    </button>
-                                </div>
-
-                            </form>
-                        </div>
-
+                        @endforeach
                     </div>
                 </div>
 

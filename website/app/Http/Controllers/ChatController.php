@@ -25,9 +25,13 @@ class ChatController extends BaseController
      */
     public function index()
     {
-//        $joined_rooms = Auth::user()->rooms;
         $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
         return view('content.chat.index', ['rooms' => $rooms]);
+    }
+    public function chat() {
+        $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
+
+        return view('content.chat.room',['rooms' => $rooms]);
     }
     public function storeRoom(Request $request) {
         $input = $request->all();

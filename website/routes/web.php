@@ -23,6 +23,7 @@ Auth::routes();
 Route::group(['prefix' => 'chat-room'], function () {
     Route::get('/', [ChatController::class, 'index'])->name('room.index');
     Route::post('/create-room', [ChatController::class, 'storeRoom'])->name('room.store');
+    Route::get('/chat', [ChatController::class, 'chat'])->name('room.chat');
     Route::post('/search/', [ChatController::class, 'search'])->name('room.search');
     Route::post('/join', [ChatController::class, 'join'])->name('room.join');
 });
