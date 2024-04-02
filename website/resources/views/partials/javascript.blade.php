@@ -1,9 +1,11 @@
 <script>
     function openModal(modal_id){
-        console.log("open modal")
+        console.log(modal_id)
         let addNewRoomFormModal = document.getElementById(modal_id);
-        addNewRoomFormModal.classList.remove('hidden');
-        addNewRoomFormModal.classList.add('visible');
+        if (addNewRoomFormModal){
+            addNewRoomFormModal.classList.remove('hidden');
+            addNewRoomFormModal.classList.add('visible');
+        }
     }
     // TODO: Close modal by Id
     function closeModal(modal_id){

@@ -23,38 +23,96 @@
                         <!-- Các thành phần khác -->
                     </div>
                 </div>
-                <div class="flex-grow p-4 ">
-                    <div class=" w-full mx-auto h-full overflow-y-auto">
-                        <div class="bg-white h-full w-full rounded-lg shadow-md overflow-hidden">
-                            <!-- Tin nhắn đến -->
-                            <div class="flex items-center p-4 border-b">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full">
-                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                <div class="flex-grow p-4 h-60">
+                    <div class="w-full mx-auto h-full overflow-y-scroll">
+                        <div class="bg-white h-full w-full rounded-lg shadow-md" id="search_room_result">
+                            @foreach($messages as $message)
+                                @if ($message->user_id == Auth::id())
+                                    <!-- Tin nhắn của bạn -->
+                                    <div class="flex items-center bg-white p-4  border-b relative" data-message-id="{{ $message->id }}">
+                                        <div class="ml-3 flex-grow text-right pr-2">
+                                            <div class="text-sm text-gray-800 font-semibold">Bạn</div>
+                                            @if ($message->type === 'image')
+                                                <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
+                                            @elseif ($message->type === 'text')
+                                                <div class="text-gray-600">{{ $message->content }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 rounded-full">
+                                                @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                            </div>
+                                        </div>
+                                        <!-- Context menu -->
+                                        <div class="absolute left-0 top-1/4 w-1/4 ">
+                                            <div>
+                                                <div id="context-menu-{{ $message->id }}" class="z-30 hidden absolute bg-white border rounded shadow-lg">
+                                                    <button class="absolute top-0 right-0 px-3 py-2" onclick="toggleContextMenu('{{ $message->id }}')">
+                                                        <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                                                            <path d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <ul class="divide-y divide-gray-200 ">
+                                                        <li>
+                                                            <button onclick="openModal('editMessageModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Edit Message</button>
+                                                        </li>
+                                                        <li>
+                                                            <a  onclick="openModal('deleteConfirmationModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Delete Message</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div id="overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-10 z-20 hidden" onclick="toggleContextMenu('{{ $message->id }}')" ></div>
+                                            </div>
+                                            <button class="focus:outline-none" onclick="toggleContextMenu('{{ $message->id }}')">
+                                                <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                                                    <path d="M12 5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="ml-3">
-                                    <div class="text-sm text-gray-800 font-semibold">Người gửi 1</div>
-                                    <div class="text-gray-600">Tin nhắn đến từ người gửi 1</div>
-                                </div>
-                            </div>
-                            <!-- Tin nhắn đi -->
-                            <div class="flex items-center p-4 border-b">
-                                <div class="ml-3 flex-grow text-right pr-2">
-                                    <div class="text-sm text-gray-800 font-semibold">Bạn</div>
-                                    <div class="text-gray-600">Tin nhắn của bạn</div>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full">
-                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                    @include('components.modals.editMessageModal',[ 'messages' => $messages])
+                                    @include('components.modals.deleteConfirmationModal',[ 'messages' => $messages])
+                                @else
+                                    <!-- Tin nhắn đến -->
+                                    <div class="flex items-center bg-white p-4 border-b">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 rounded-full">
+                                                @include('components.avatar', ['avatar_path' => $message->user->avatar ?? 'images/avatar.jpg'])
+                                            </div>
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm text-gray-800 font-semibold">{{ $message->user->name }}</div>
+                                            @if ($message->type === 'image')
+                                                <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
+                                            @elseif ($message->type === 'text')
+                                                <div class="text-gray-600">{{ $message->content }}</div>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
                 </div>
-                <div class="flex-none p-4 w-full">
 
+                <div class="flex-none p-4 ">
+                    <form class="flex items-center justify-between w-full bg-gray-800 p-4 rounded-lg" id="messageForm">
+                        @csrf
+                        <div class="flex-grow mr-4">
+                            <label for="content" class="sr-only">Nội dung tin nhắn:</label>
+                            <input name="content" type="text" id="content"
+                                   aria-label="Image" aria-describedby="button-image"
+                                   class="form-control text-gray-900 w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:border-blue-500" placeholder="Nhập tin nhắn...">
+                        </div>
+                        <div class="mr-4">
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-image"><i class="fa-solid fa-image"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="text-3xl px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none" type="submit"><i class="fa-solid fa-location-arrow"></i></button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -96,24 +154,8 @@
 
                 </form>
                 <div class=" w-full h-full  text-white flex-grow py-8">
-                    <div class="w-full" id="rooms_list">
-                        @foreach($rooms as $room)
-                            <div  class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
-                                <div class="col-span-1">
-                                    <div class="flex justify-start items-center gap-4">
-                                        <div class="w-8 h-8 rounded-full">
-                                            @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
-                                        </div>
-                                        <p class="font-bold">{{$room->name}}</p>
-                                    </div>
-                                </div>
-
-                                <div class="absolute top-0 right-0 text-sm mr-2 mt-1  flex justify-end items-center gap-4">
-                                    <p class="text-gray-400">2 min ago</p>
-                                    {{--                                @include('components.countNotification', ['number' => 1])--}}
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="w-full" id="users_list">
+                        @include('components.userList', ['users' => $users])
                     </div>
                 </div>
 
@@ -126,63 +168,149 @@
 
     <!-- Import CDN jquery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <!-- Call Ajax handle -->
     <script>
+        function toggleContextMenu(messageId) {
+            var menu = document.getElementById('context-menu-' + messageId);
+            var overlay = document.getElementById('overlay');
+            menu.classList.toggle('hidden');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
 
-
+    <script>
         $(document).ready(function() {
-            // Bắt sự kiện submit form
-            $('#createRoomForm').submit(function(e) {
+            $('#messageForm').submit(function(e) {
                 e.preventDefault();
                 console.log("Form submit!")
                 $.ajax({
                     type: 'POST',
-                    url: '{{ route("room.store") }}', // Găn route
-                    data: $(this).serialize(), // Dữ liệu form
+                    url: '{{ route("room.send-message", ['roomId' => $roomId]) }}',
+                    data: $('#messageForm').serialize(),
                     success: function(response) {
-                        // Handle the success response
-                        turnOnNotification(response.message, "success");
-                        const room = response.room;
-                        if (!room)  return;
-
-                        if (room.icon === null){
-                            room.icon = '/images/avatar.jpg';
-                        }
-                        if (room.description == null){
-                            room.description = '';
-                        }
-                        let html =
-                            `<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
-                            <div class="col-span-1">
-                                <div class="flex justify-start items-center gap-4">
+                        console.log(response)
+                        let messages = response;
+                        let html = '';
+                        for (let i = 0; i < messages.length; i++) {
+                            if (messages[i].user_id === {{ Auth::id() }}) {
+                                // Tin nhắn của bạn
+                                html +=
+                                    `<div class="flex items-center p-4 border-b">
+                                <div class="ml-3 flex-grow text-right pr-2">
+                                    <div class="text-sm text-gray-800 font-semibold">Bạn</div>`;
+                                if (messages[i].type === 'image') {
+                                    html += `<img src="${messages[i].content}" alt="Tin nhắn ảnh">`;
+                                } else if (messages[i].type === 'text') {
+                                    html += `<div class="text-gray-600">${messages[i].content}</div>`;
+                                }
+                                html +=
+                                    `</div>
+                                <div class="flex-shrink-0">
                                     <div class="w-8 h-8 rounded-full">
-                                        <img src="${room.icon}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
+                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
                                     </div>
-                                    <p class="font-bold">${room.name}</p>
                                 </div>
-                            </div>
-                            <div class="col-span-2">
-                                <p>${room.description}</p>
-                            </div>
-                        </a>`;
-
-                        // Add to top of room list
-                        $('#rooms_list').prepend(html);
-
-                        closeModal('addNewRoomFormModal');
-
+                            </div>`;
+                            } else {
+                                // Tin nhắn đến
+                                html +=
+                                    `<div class="flex items-center p-4 border-b">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full">
+                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <div class="text-sm text-gray-800 font-semibold"></div>`;
+                                if (messages[i].type === 'image') {
+                                    html += `<img src="${messages[i].content}" alt="Tin nhắn ảnh">`;
+                                } else if (messages[i].type === 'text') {
+                                    html += `<div class="text-gray-600">${messages[i].content}</div>`;
+                                }
+                                html +=
+                                    `</div>
+                            </div>`;
+                            }
+                        }
+                        // Hiển thị tất cả tin nhắn
+                        $('#search_room_result').html(html);
                     },
                     error: function(error) {
-                        // Handle the error response
                         console.log(error);
-                        closeModal('addNewRoomFormModal');
-                    },
+                    }
                 });
-
-                $('#createRoomForm')[0].reset();
             });
         });
-    </script>
 
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            document.getElementById('button-image').addEventListener('click', (event) => {
+                event.preventDefault();
+
+                window.open('/file-manager/fm-button', 'fm', 'width=1400,height=800');
+            });
+        });
+
+        // set file link
+        function fmSetLink($url) {
+            // if (document.getElementById('content').type === 'text'){
+            //     document.getElementById('content').type = 'type'
+            // }
+            // document.getElementById('content'). =  ;
+
+            $url = $url.replace('http://localhost/', 'http://localwebsite.th/');
+            document.getElementById('content').value = $url;
+        }
+    </script>
+    <script>
+        // Bắt sự kiện click chuột phải trên tin nhắn
+        document.querySelectorAll('.message').forEach(item => {
+            item.addEventListener('contextmenu', event => {
+                event.preventDefault();
+                // Hiển thị context menu
+                const contextMenu = document.getElementById('context-menu');
+                contextMenu.style.left = event.pageX + 'px';
+                contextMenu.style.top = event.pageY + 'px';
+                contextMenu.classList.remove('hidden');
+                // Lưu id của tin nhắn được chọn
+                contextMenu.dataset.messageId = item.dataset.messageId;
+
+                document.querySelectorAll('.message').forEach(message => {
+                    message.classList.remove('selected');
+                });
+                // Thêm lớp 'selected' vào tin nhắn được chọn
+                item.classList.add('selected');
+            });
+        });
+
+        // Bắt sự kiện click chuột ngoài context menu để ẩn nó đi
+        document.addEventListener('click', event => {
+            const contextMenu = document.getElementById('context-menu');
+            if (!contextMenu.contains(event.target)) {
+                contextMenu.classList.add('hidden');
+            }
+        });
+
+        function deleteMessage(messageId) {
+            console.log('/chat-room/delete-message/${messageId}')
+            $.ajax({
+                url: `/chat-room/delete-message/`+ messageId,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Handle success, maybe redirect or refresh page
+                    console.log('Message has been deleted successfully');
+                    closeModal('deleteConfirmationModal'+ messageId)
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors
+                    console.error('An error occurred:', error);
+                    closeModal('deleteConfirmationModal'+ messageId)
+                }
+            });
+        }
+
+    </script>
 @endsection

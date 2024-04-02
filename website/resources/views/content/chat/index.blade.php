@@ -25,7 +25,7 @@
                 <p class="font-semibold">My rooms</p>
                 <div class="w-full" id="rooms_list">
                     @foreach($rooms as $room)
-                        <a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                        <a href="chat-room/chat/{{$room->id}}" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
                             <div class="col-span-1">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
@@ -72,9 +72,9 @@
             </div>
         </div>
         <!-- column 3 -->
-        <div class="col-span-1 w-full h-full bg-[#212540] pl-12 pr-12 py-8">
-            <div class="flex flex-col  ">
-                <div class=" w-full h-full bg-[#212540] col-span-1 ">
+        <div class="col-span-1 w-full h-full bg-[#212540] pl-12 pr-12 py-8 relative">
+            <div class=" h-full grid grid-rows-6  ">
+                <div class=" w-full h-full bg-[#212540] row-span-1 ">
                     <div class="flex">
                         <div class="col-span-1 w-full h-full bg-[#212540]  flex ">
                             <div class="flex-shrink-0 mr-4">
@@ -88,7 +88,7 @@
                         <!-- Các thành phần khác -->
                     </div>
                 </div>
-                <form id="" class="w-full h-full bg-[#212540] col-span-4 py-8 flex items-center">
+                <form id="" class="w-full h-full bg-[#212540] row-span-1 py-8 flex items-center">
                     @csrf
                     <!-- Form Title -->
                     <h3 class="text-2xl text-center font-bold pr-2 text-white">Search </h3>
@@ -106,7 +106,7 @@
                     </div>
 
                 </form>
-                <div class=" w-full h-full  text-white flex-grow py-8">
+                <div class=" w-full h-full  text-white flex-grow py-8 row-span-4 relative">
                     <div class="w-full" id="rooms_list">
                         @foreach($rooms as $room)
                             <div  class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
@@ -118,16 +118,13 @@
                                         <p class="font-bold">{{$room->name}}</p>
                                     </div>
                                 </div>
-
-                                <div class="absolute top-0 right-0 text-sm mr-2 mt-1  flex justify-end items-center gap-4">
-                                    <p class="text-gray-400">2 min ago</p>
-                                    {{--                                @include('components.countNotification', ['number' => 1])--}}
-                                </div>
                             </div>
                         @endforeach
                     </div>
+                    <div class="text-center  bottom-0 w-full absolute">
+                        <a href="#" class="mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -164,19 +161,19 @@
                             room.description = '';
                         }
                         let html =
-                            `<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
-                            <div class="col-span-1">
-                                <div class="flex justify-start items-center gap-4">
-                                    <div class="w-8 h-8 rounded-full">
-                                        <img src="${room.icon}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
+                            `<a href="/chat/${room.id}" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                                <div class="col-span-1">
+                                    <div class="flex justify-start items-center gap-4">
+                                        <div class="w-8 h-8 rounded-full">
+                                            <img src="${room.icon}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
+                                        </div>
+                                        <p class="font-bold">${room.name}</p>
                                     </div>
-                                    <p class="font-bold">${room.name}</p>
                                 </div>
-                            </div>
-                            <div class="col-span-2">
-                                <p>${room.description}</p>
-                            </div>
-                        </a>`;
+                                <div class="col-span-2">
+                                    <p>${room.description}</p>
+                                </div>
+                            </a>`;
 
                         // Add to top of room list
                         $('#rooms_list').prepend(html);
@@ -195,5 +192,21 @@
             });
         });
     </script>
+    <script>
+        function getRoomUsers(roomId) {
 
+            $.ajax({
+                url: "/room/${roomId}/users",
+                type: 'GET',
+                success: function(response) {
+                    console.log('success')
+                    $('#users_list').html(response);
+                },
+                error: function(xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
+    </script>
 @endsection

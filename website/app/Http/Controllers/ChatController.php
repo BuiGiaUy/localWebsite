@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -28,14 +29,23 @@ class ChatController extends BaseController
         $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
         return view('content.chat.index', ['rooms' => $rooms]);
     }
-    public function chat() {
-        $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
+    public function chat($id) {
 
-        return view('content.chat.room',['rooms' => $rooms]);
+        $room = Room::find($id);
+
+        $users = $room ->users;
+
+        $messages = $room ->messages;
+
+//        echo '<pre>';
+//        print_r($messages);
+//        echo '</pre>';
+//        exit();
+
+        return view('content.chat.room',['room' => $room, 'users' => $users,'roomId' => $id, 'messages'=>$messages]);
     }
     public function storeRoom(Request $request) {
         $input = $request->all();
-
 
         $room = Room::create([
             'name' => $input['room_name'],
@@ -45,6 +55,20 @@ class ChatController extends BaseController
         ]);
 
         return response()->json($room, 200);
+    }
+    public function getRoomUsers($id) {
+        if ($id == null) {
+            $id = 1;
+        }
+
+        $room = Room::find($id);
+
+//        echo '<pre>';
+//        print_r($room);
+//        echo '</pre>';
+//        exit();
+        $users = $room->users;
+        return response()->json($users, 200);
     }
 
     public function search(Request $request) {
