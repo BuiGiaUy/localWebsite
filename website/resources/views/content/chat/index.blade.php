@@ -23,9 +23,9 @@
             </div>
             <div class="w-ful pl-4 mt-12">
                 <p class="font-semibold">My rooms</p>
-                <div class="w-full" id="rooms_list">
+                <div class="w-full" id="createRoomForm">
                     @foreach($rooms as $room)
-                        <a href="chat-room/chat/{{$room->id}}" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                        <button data-room-id="{{ $room->id }}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
                             <div class="col-span-1">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
@@ -41,7 +41,7 @@
                                 <p class="text-gray-400">2 min ago</p>
 {{--                                @include('components.countNotification', ['number' => 1])--}}
                             </div>
-                        </a>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -49,46 +49,48 @@
             <div class="w-ful pl-4 mt-12">
                 <p class="font-semibold">Joined rooms</p>
                 <div class="w-full" id="joined_rooms_list">
-{{--                    @foreach($joined_rooms as $room)--}}
-{{--                        <a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">--}}
-{{--                            <div class="col-span-1">--}}
-{{--                                <div class="flex justify-start items-center gap-4">--}}
-{{--                                    <div class="w-8 h-8 rounded-full">--}}
-{{--                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])--}}
-{{--                                    </div>--}}
-{{--                                    <p class="font-bold">{{$room->name}}</p>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-span-2">--}}
-{{--                                <p> {{$room->description}}</p>--}}
-{{--                            </div>--}}
-{{--                            <div class="absolute top-0 right-0 text-sm mr-2 mt-1  flex justify-end items-center gap-4">--}}
-{{--                                <p class="text-gray-400">2 min ago</p>--}}
+                    @foreach($joined_rooms as $room)
+                        <button data-room-id="{{ $room->id }}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                            <div class="col-span-1">
+                                <div class="flex justify-start items-center gap-4">
+                                    <div class="w-8 h-8 rounded-full">
+                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                    </div>
+                                    <p class="font-bold">{{$room->name}}</p>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <p> {{$room->description}}</p>
+                            </div>
+                            <div class="absolute top-0 right-0 text-sm mr-2 mt-1  flex justify-end items-center gap-4">
+                                <p class="text-gray-400">2 min ago</p>
 {{--                                @include('components.countNotification', ['number' => 1])--}}
-{{--                            </div>--}}
-{{--                        </a>--}}
-{{--                    @endforeach--}}
+                            </div>
+                        </button>
+                    @endforeach
                 </div>
             </div>
         </div>
         <!-- column 3 -->
         <div class="col-span-1 w-full h-full bg-[#212540] pl-12 pr-12 py-8 relative">
-            <div class=" h-full grid grid-rows-6  ">
+            <div class="grid-rows-8 grid w-full h-full relative  ">
                 <div class=" w-full h-full bg-[#212540] row-span-1 ">
-                    <div class="flex">
+                    <div class="flex ">
                         <div class="col-span-1 w-full h-full bg-[#212540]  flex ">
                             <div class="flex-shrink-0 mr-4">
-                                <img src="images/avatar.jpg" alt="Avatar" class="w-12 h-12 rounded-full">
+                                <div class="w-8 h-8 rounded-full">
+                                    @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                </div>
                             </div>
-                            <div>
-                                <div class="text-white font-bold ">Avatar Name</div>
-                                <div class="text-gray-300">First line of text</div>
+                            <div id="title_room_name">
+{{--                                <div class="text-white font-bold ">Avatar Name</div>--}}
+{{--                                <div class="text-gray-300">First line of text</div>--}}
                             </div>
                         </div>
                         <!-- Các thành phần khác -->
                     </div>
                 </div>
-                <form id="" class="w-full h-full bg-[#212540] row-span-1 py-8 flex items-center">
+                <form id="" class="w-full h-full bg-[#212540] row-span-1 py-4 flex items-center">
                     @csrf
                     <!-- Form Title -->
                     <h3 class="text-2xl text-center font-bold pr-2 text-white">Search </h3>
@@ -106,24 +108,14 @@
                     </div>
 
                 </form>
-                <div class=" w-full h-full  text-white flex-grow py-8 row-span-4 relative">
-                    <div class="w-full" id="rooms_list">
-                        @foreach($rooms as $room)
-                            <div  class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
-                                <div class="col-span-1">
-                                    <div class="flex justify-start items-center gap-4">
-                                        <div class="w-8 h-8 rounded-full">
-                                            @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
-                                        </div>
-                                        <p class="font-bold">{{$room->name}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                <div class=" w-full h-full  text-white row-span-6 ">
+                    <div class="w-full" id="users_list">
+                        {{--                            @include('components.userList', ['users' => $users, 'room'=> $room])--}}
+
                     </div>
-                    <div class="text-center  bottom-0 w-full absolute">
-                        <a href="#" class="mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
-                    </div>
+                </div>
+                <div class="text-center w-full row-span-1" id="link_room">
+{{--                    <a href="#" class="mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>--}}
                 </div>
             </div>
         </div>
@@ -141,6 +133,7 @@
 
         $(document).ready(function() {
             // Bắt sự kiện submit form
+
             $('#createRoomForm').submit(function(e) {
                 e.preventDefault();
                 console.log("Form submit!")
@@ -161,7 +154,7 @@
                             room.description = '';
                         }
                         let html =
-                            `<a href="/chat/${room.id}" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                            `<button data-room-id="${room.id}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
                                 <div class="col-span-1">
                                     <div class="flex justify-start items-center gap-4">
                                         <div class="w-8 h-8 rounded-full">
@@ -173,7 +166,7 @@
                                 <div class="col-span-2">
                                     <p>${room.description}</p>
                                 </div>
-                            </a>`;
+                            </button>`;
 
                         // Add to top of room list
                         $('#rooms_list').prepend(html);
@@ -193,20 +186,103 @@
         });
     </script>
     <script>
-        function getRoomUsers(roomId) {
-
-            $.ajax({
-                url: "/room/${roomId}/users",
-                type: 'GET',
-                success: function(response) {
-                    console.log('success')
-                    $('#users_list').html(response);
-                },
-                error: function(xhr) {
-                    console.log(xhr.responseText);
-                }
+        $(document).ready(function() {
+            getRoomUsers(1)
+            $('.room-button').click(function() {
+                // Get the room ID from the data-room-id attribute of the clicked button
+                let roomId = $(this).data('room-id');
+                // Call the getRoomUsers function with the room ID
+                getRoomUsers(roomId);
             });
-        }
 
+
+            function getRoomUsers(roomId) {
+                console.log('Getting room users for room ID:', roomId);
+                if (!roomId) {
+                    roomId = 1;
+                }
+
+                $.ajax({
+                    url: `/chat-room/room/${roomId}/users`,
+                    type: 'GET',
+                    success: function(response) {
+                        // Dynamically generate HTML markup based on the received data
+                        let usersHtml = '';
+                        let titleNameRoomHtml = ''
+                        let linkRoom = ''
+                        console.log(response)
+                        let description = response.room.description
+                        if (description === null) {
+                            description =''
+                        }
+                        titleNameRoomHtml =`
+                            <div class="text-white font-bold ">${response.room.name}</div>
+                            <div class="text-gray-300">${description} </div>
+                        `
+                        linkRoom = `
+                            <button data-room-chat-id="${response.room.id}"  class="btn-link-room mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
+                        `
+
+                        if (response.room.owner) {
+                            usersHtml += `
+                                 <div class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                                    <div class="col-span-1 flex items-center space-x-4">
+                                        <div class="w-8 h-8 rounded-full">
+                                            <img src="${response.room.owner.icon || 'images/avatar.jpg'}" alt="Avatar">
+                                        </div>
+                                        <p class="font-bold">${response.room.owner.name}</p>
+                                    </div>
+                                    <div class="col-span-2 flex items-center justify-center">
+                                        <div class="text-sm font-semibold text-gray-400">${response.room.owner ? 'Group Leader' : ''}</div>
+                                    </div>
+                                 </div>
+                            `;
+                        }
+                        response.users.forEach(function(user) {
+
+                            usersHtml += `
+                                 <div class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                                    <div class="col-span-1 flex items-center space-x-4">
+                                        <div class="w-8 h-8 rounded-full">
+                                            <img src="${user.icon || 'images/avatar.jpg'}" alt="Avatar">
+                                        </div>
+                                        <p class="font-bold">${user.name}</p>
+                                    </div>
+                                    <div class="col-span-2 flex items-center justify-center">
+                                        <div class="text-sm font-semibold text-gray-400">${response.room.owner.id === user.id ? 'Group Leader' : ''}</div>
+                                    </div>
+                                 </div>
+                            `;
+
+                        });
+
+                        // Update the HTML content of the users list container
+                        $('#users_list').html(usersHtml);
+                        $('#title_room_name').html(titleNameRoomHtml);
+                        $('#link_room').html(linkRoom);
+
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            }
+            $('#link_room').on('click', '.btn-link-room', function() {
+                let roomId = $(this).data('room-chat-id');
+                console.log(roomId)
+                $.ajax({
+                    url:`/chat-room/chat/${roomId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response)
+                        window.location.href = `/chat-room/chat/${roomId}`;
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                })
+
+            })
+        });
     </script>
 @endsection

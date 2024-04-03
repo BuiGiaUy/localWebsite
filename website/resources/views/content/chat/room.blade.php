@@ -16,8 +16,8 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="text-white font-bold ">Avatar Name</div>
-                                <div class="text-gray-300">First line of text</div>
+                                <div class="text-white font-bold ">{{$room->name}}</div>
+                                <div class="text-gray-300">{{$room->decription}}</div>
                             </div>
                         </div>
                         <!-- Các thành phần khác -->
@@ -26,71 +26,78 @@
                 <div class="flex-grow p-4 h-60">
                     <div class="w-full mx-auto h-full overflow-y-scroll">
                         <div class="bg-white h-full w-full rounded-lg shadow-md" id="search_room_result">
-                            @foreach($messages as $message)
-                                @if ($message->user_id == Auth::id())
-                                    <!-- Tin nhắn của bạn -->
-                                    <div class="flex items-center bg-white p-4  border-b relative" data-message-id="{{ $message->id }}">
-                                        <div class="ml-3 flex-grow text-right pr-2">
-                                            <div class="text-sm text-gray-800 font-semibold">Bạn</div>
-                                            @if ($message->type === 'image')
-                                                <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
-                                            @elseif ($message->type === 'text')
-                                                <div class="text-gray-600">{{ $message->content }}</div>
-                                            @endif
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <div class="w-8 h-8 rounded-full">
-                                                @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                            @if($messages->isEmpty())
+                                <!-- Nếu không có tin nhắn nào, hiển thị tin nhắn mời bắt đầu -->
+                                <div class="text-gray-600 text-center py-4">Let's kick off the conversation! </div>
+                                <div class="text-gray-600 text-center ">Send the first message to get things rolling.</div>
+                            @else
+                                @foreach($messages as $message)
+                                    @if ($message->user_id == Auth::id())
+                                        <!-- Tin nhắn của bạn -->
+                                        <div class="flex items-center bg-white p-4  border-b relative" data-message-id="{{ $message->id }}">
+                                            <div class="ml-3 flex-grow text-right pr-2">
+                                                <div class="text-sm text-gray-800 font-semibold">Bạn</div>
+                                                @if ($message->type === 'image')
+                                                    <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
+                                                @elseif ($message->type === 'text')
+                                                    <div class="text-gray-600">{{ $message->content }}</div>
+                                                @endif
                                             </div>
-                                        </div>
-                                        <!-- Context menu -->
-                                        <div class="absolute left-0 top-1/4 w-1/4 ">
-                                            <div>
-                                                <div id="context-menu-{{ $message->id }}" class="z-30 hidden absolute bg-white border rounded shadow-lg">
-                                                    <button class="absolute top-0 right-0 px-3 py-2" onclick="toggleContextMenu('{{ $message->id }}')">
-                                                        <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
-                                                            <path d="M6 18L18 6M6 6l12 12"></path>
-                                                        </svg>
-                                                    </button>
-                                                    <ul class="divide-y divide-gray-200 ">
-                                                        <li>
-                                                            <button onclick="openModal('editMessageModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Edit Message</button>
-                                                        </li>
-                                                        <li>
-                                                            <a  onclick="openModal('deleteConfirmationModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Delete Message</a>
-                                                        </li>
-                                                    </ul>
+                                            <div class="flex-shrink-0">
+                                                <div class="w-8 h-8 rounded-full">
+                                                    @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
                                                 </div>
-                                                <div id="overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-10 z-20 hidden" onclick="toggleContextMenu('{{ $message->id }}')" ></div>
                                             </div>
-                                            <button class="focus:outline-none" onclick="toggleContextMenu('{{ $message->id }}')">
-                                                <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
-                                                    <path d="M12 5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    @include('components.modals.editMessageModal',[ 'messages' => $messages])
-                                    @include('components.modals.deleteConfirmationModal',[ 'messages' => $messages])
-                                @else
-                                    <!-- Tin nhắn đến -->
-                                    <div class="flex items-center bg-white p-4 border-b">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-8 h-8 rounded-full">
-                                                @include('components.avatar', ['avatar_path' => $message->user->avatar ?? 'images/avatar.jpg'])
+                                            <!-- Context menu -->
+                                            <div class="absolute left-0 top-1/4 w-1/4 ">
+                                                <div>
+                                                    <div id="context-menu-{{ $message->id }}" class="z-30 hidden absolute bg-white border rounded shadow-lg">
+                                                        <button class="absolute top-0 right-0 px-3 py-2" onclick="toggleContextMenu('{{ $message->id }}')">
+                                                            <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                                                                <path d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <ul class="divide-y divide-gray-200 ">
+                                                            <li>
+                                                                <button onclick="openModal('editMessageModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Edit Message</button>
+                                                            </li>
+                                                            <li>
+                                                                <a  onclick="openModal('deleteConfirmationModal{{ $message->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Delete Message</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div id="overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-10 z-20 hidden" onclick="toggleContextMenu('{{ $message->id }}')" ></div>
+                                                </div>
+                                                <button class="focus:outline-none" onclick="toggleContextMenu('{{ $message->id }}')">
+                                                    <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                                                        <path d="M12 5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                                    </svg>
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm text-gray-800 font-semibold">{{ $message->user->name }}</div>
-                                            @if ($message->type === 'image')
-                                                <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
-                                            @elseif ($message->type === 'text')
-                                                <div class="text-gray-600">{{ $message->content }}</div>
-                                            @endif
+                                        @include('components.modals.editMessageModal',[ 'messages' => $messages])
+                                        @include('components.modals.deleteConfirmationModal',[ 'messages' => $messages])
+                                    @else
+                                        <!-- Tin nhắn đến -->
+                                        <div class="flex items-center bg-white p-4 border-b">
+                                            <div class="flex-shrink-0">
+                                                <div class="w-8 h-8 rounded-full">
+                                                    @include('components.avatar', ['avatar_path' => $message->user->avatar ?? 'images/avatar.jpg'])
+                                                </div>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm text-gray-800 font-semibold">{{ $message->user->name }}</div>
+                                                @if ($message->type === 'image')
+                                                    <img src="{{ $message->content }}" alt="Tin nhắn ảnh">
+                                                @elseif ($message->type === 'text')
+                                                    <div class="text-gray-600">{{ $message->content }}</div>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
-                            @endforeach
+                                    @endif
+
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -128,8 +135,8 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="text-white font-bold ">Avatar Name</div>
-                                <div class="text-gray-300">First line of text</div>
+                                <div class="text-white font-bold ">{{$room->name}}</div>
+                                <div class="text-gray-300">{{$room->decription}}</div>
                             </div>
                         </div>
                         <!-- Các thành phần khác -->
@@ -155,10 +162,9 @@
                 </form>
                 <div class=" w-full h-full  text-white flex-grow py-8">
                     <div class="w-full" id="users_list">
-                        @include('components.userList', ['users' => $users])
+                        @include('components.userList', ['users' => $users, 'room'=> $room])
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

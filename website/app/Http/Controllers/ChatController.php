@@ -26,14 +26,20 @@ class ChatController extends BaseController
      */
     public function index()
     {
-        $rooms = Room::Where('owner_id', '=', Auth::user()->id)->get();
-        return view('content.chat.index', ['rooms' => $rooms]);
+        $joined_rooms = Auth::user()->rooms;
+        $rooms = Room::where('owner_id','=', Auth::user()->id)->get();
+//          echo "<pre>";
+//          print_r($joined_rooms);
+//          echo "</pre>";
+//          exit();
+
+        return view('content.chat.index', ['rooms' => $rooms,'joined_rooms' => $joined_rooms]);
     }
     public function chat($id) {
 
         $room = Room::find($id);
 
-        $users = $room ->users;
+        $users = $room->users;
 
         $messages = $room ->messages;
 
@@ -68,7 +74,7 @@ class ChatController extends BaseController
 //        echo '</pre>';
 //        exit();
         $users = $room->users;
-        return response()->json($users, 200);
+        return response()->json(['users'=> $users, 'room'=> $room ],  200);
     }
 
     public function search(Request $request) {

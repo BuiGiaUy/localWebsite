@@ -49,9 +49,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Room::class, 'owner_id', 'id');
     }
-    public function rooms() : BelongsToMany
+    public function rooms(): BelongsToMany
     {
-        return $this->belongsToMany(Room::class, 'room_user', 'user_id','room_id');
+        /* Khai báo quan hệ n-n với model Room với tên bảng trung gian là room_user
+        và khóa ngoại của bảng room_user là user_id và room_id */
+        return $this->belongsToMany(Room::class, 'room_user', 'user_id', 'room_id');
     }
 
 }

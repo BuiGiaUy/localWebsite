@@ -111,7 +111,7 @@
                     let html = '';
                     for(let i=0; i<rooms.length; i++){
                         html +=
-                            `<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2" id="search-room-result-${rooms[i].id}">
+                            `<button data-room-id="${room[i].id}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2" id="search-room-result-${rooms[i].id}">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
                                         <img src="${rooms[i].icon ?? 'images/avatar.jpg'}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
