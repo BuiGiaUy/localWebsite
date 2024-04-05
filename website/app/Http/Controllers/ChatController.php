@@ -76,7 +76,23 @@ class ChatController extends BaseController
         $users = $room->users;
         return response()->json(['users'=> $users, 'room'=> $room ],  200);
     }
+    public function deleteRoom($id)
+    {
+        $room = Room::find($id);
+//        echo '<pre>';
+//        print_r($room);
+//        echo '</pre>';
+//        exit();
+        if (!$room) {
+            return response()->json(['error' => 'Room not found'], 404);
+        }
 
+// Delete the room
+        $room->delete();
+
+// Redirect the user to the index page with a success message
+        return redirect()->route('room.index')->with('success', 'Room has been deleted successfully');
+    }
     public function search(Request $request) {
         $search_room_name = $request->input('search_room_name');
         if ($search_room_name != "") {

@@ -25,6 +25,7 @@ Route::group(['prefix' => 'chat-room'], function () {
     Route::get('/room/{id}/users', [ChatController::class, 'getRoomUsers'])->name('room.users');
     Route::post('/{roomId}/send-message', [MessageController::class, 'sendMessage'])->name('room.send-message');
     Route::delete('/delete-message/{id}', [MessageController::class, 'deleteMessage'])->name('room.delete-message');
+    Route::delete('/delete-room/{id}', [ChatController::class, 'deleteRoom'])->name('room.delete');
     Route::post('/edit-message/{id}', [MessageController::class, 'editMessage'])->name('room.edit-message');
     Route::post('/create-room', [ChatController::class, 'storeRoom'])->name('room.store');
     Route::get('/chat/{id}', [ChatController::class, 'chat'])->name('room.chat');

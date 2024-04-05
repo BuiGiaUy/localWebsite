@@ -128,20 +128,21 @@
         <!-- column 3 -->
         <div class="col-span-1 w-full h-full bg-[#212540] pl-12 pr-12 py-8">
             <div class="flex flex-col  ">
-                <div class=" w-full h-full bg-[#212540] col-span-1 ">
+                <div class="w-full h-full bg-[#212540] col-span-1">
                     <div class="flex">
-                        <div class="col-span-1 w-full h-full bg-[#212540]  flex ">
+                        <div class="col-span-1 w-full h-full bg-[#212540] flex">
                             <div class="flex-shrink-0 mr-4">
                                 <div class="w-8 h-8 rounded-full">
                                     @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
                                 </div>
                             </div>
                             <div>
-                                <div class="text-white font-bold ">{{$room->name}}</div>
-                                <div class="text-gray-300">{{$room->decription}}</div>
+                                <div class="text-white font-bold">{{$room->name}}</div>
+                                <div class="text-gray-300">{{$room->description}}</div>
                             </div>
                         </div>
-                        <!-- Các thành phần khác -->
+
+                        <button onclick="exitRoom({{$roomId}})" class="text-white ml-4 focus:outline-none text-xl"><i class="fa-solid fa-right-from-bracket"></i></button>
                     </div>
                 </div>
                 <form id="" class="w-full h-full bg-[#212540] col-span-4 py-8 flex items-center">
@@ -447,6 +448,25 @@
                     // Xử lý lỗi khi yêu cầu AJAX thất bại
                     console.log(xhr.responseText);
                     alert('Error: Failed to retrieve member list.'); // Hiển thị thông báo lỗi (optional)
+                }
+            });
+        }
+    </script>
+    <script>
+        function exitRoom(id) {
+            console.log(id)
+            $.ajax({
+                url: `/chat-room/delete-room/${id}`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                success: function(result) {
+                    window.location.href = "{{ route('room.index') }}";
+                },
+                error: function(xhr, status, error) {
+                    alert('Error');
+                    console.error(xhr.responseText);
                 }
             });
         }

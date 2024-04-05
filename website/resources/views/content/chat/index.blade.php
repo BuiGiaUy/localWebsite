@@ -75,19 +75,21 @@
         <div class="col-span-1 w-full h-full bg-[#212540] pl-12 pr-12 py-8 relative">
             <div class="grid-rows-8 grid w-full h-full relative  ">
                 <div class=" w-full h-full bg-[#212540] row-span-1 ">
-                    <div class="flex ">
+                    <div class="flex " id="title_room_name">
                         <div class="col-span-1 w-full h-full bg-[#212540]  flex ">
                             <div class="flex-shrink-0 mr-4">
                                 <div class="w-8 h-8 rounded-full">
                                     @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
                                 </div>
                             </div>
-                            <div id="title_room_name">
+                            <div >
 {{--                                <div class="text-white font-bold ">Avatar Name</div>--}}
 {{--                                <div class="text-gray-300">First line of text</div>--}}
                             </div>
                         </div>
                         <!-- Các thành phần khác -->
+                        <button onclick="exitRoom()" class="text-white ml-4 focus:outline-none text-xl"><i class="fa-solid fa-right-from-bracket"></i></button>
+
                     </div>
                 </div>
                 <form id="" class="w-full h-full bg-[#212540] row-span-1 py-4 flex items-center">
@@ -191,8 +193,10 @@
             $('.room-button').click(function() {
                 // Get the room ID from the data-room-id attribute of the clicked button
                 let roomId = $(this).data('room-id');
+
                 // Call the getRoomUsers function with the room ID
                 getRoomUsers(roomId);
+
             });
 
 
@@ -216,8 +220,19 @@
                             description =''
                         }
                         titleNameRoomHtml =`
-                            <div class="text-white font-bold ">${response.room.name}</div>
-                            <div class="text-gray-300">${description} </div>
+                            <div class="col-span-1 w-full h-full bg-[#212540]  flex ">
+                                <div class="flex-shrink-0 mr-4">
+                                    <div class="w-8 h-8 rounded-full">
+                                        @include('components.avatar', ['avatar_path' => $room->icon ?? 'images/avatar.jpg'])
+                                    </div>
+                                </div>
+                                <div >
+                                    <div class="text-white font-bold ">${response.room.name}</div>
+                                    <div class="text-gray-300">${description} </div>
+                                </div>
+                            </div>
+                            <!-- Các thành phần khác -->
+                            <button onclick="exitRoom(${response.room.id})" class="text-white ml-4 focus:outline-none text-xl"><i class="fa-solid fa-right-from-bracket"></i></button>
                         `
                         linkRoom = `
                             <button data-room-chat-id="${response.room.id}"  class="btn-link-room mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
@@ -284,5 +299,26 @@
 
             })
         });
+    </script>
+    <script>
+        function exitRoom(roomId) {
+
+
+            console.log(roomId)
+            $.ajax({
+                url: `/chat-room/delete-room/${roomId}`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                success: function(result) {
+                    window.location.href = "{{ route('room.index') }}";
+                },
+                error: function(xhr, status, error) {
+                    alert('Error');
+                    console.error(xhr.responseText);
+                }
+            });
+        }
     </script>
 @endsection
