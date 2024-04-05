@@ -95,7 +95,6 @@
                                             </div>
                                         </div>
                                     @endif
-
                                 @endforeach
                             @endif
                         </div>
@@ -105,11 +104,14 @@
                 <div class="flex-none p-4 ">
                     <form class="flex items-center justify-between w-full bg-gray-800 p-4 rounded-lg" id="messageForm">
                         @csrf
-                        <div class="flex-grow mr-4">
+                        <div class="flex-grow relative mr-4">
                             <label for="content" class="sr-only">Nội dung tin nhắn:</label>
-                            <input name="content" type="text" id="content"
+                            <input name="content" type="text" id="content" data-room-id="{{$roomId}}"
                                    aria-label="Image" aria-describedby="button-image"
                                    class="form-control text-gray-900 w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:border-blue-500" placeholder="Nhập tin nhắn...">
+                            <div id="memberList" class=" absolute text-gray-900 bg-white border border-gray-300 shadow-lg p-2 rounded-lg" style="display: none;">
+                                <!-- Danh sách thành viên sẽ được hiển thị ở đây -->
+                            </div>
                         </div>
                         <div class="mr-4">
                             <div class="input-group">
@@ -171,13 +173,12 @@
     <!-- add New Room Form Modal -->
     @include('components.modals.roomFormModal')
     @include('components.modals.searchRoomModal')
-
     <!-- Import CDN jquery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         function toggleContextMenu(messageId) {
-            var menu = document.getElementById('context-menu-' + messageId);
-            var overlay = document.getElementById('overlay');
+            let menu = document.getElementById('context-menu-' + messageId);
+            let overlay = document.getElementById('overlay');
             menu.classList.toggle('hidden');
             overlay.classList.toggle('hidden');
         }
@@ -318,5 +319,136 @@
             });
         }
 
+    </script>
+    <script>
+        // // Global variables to store search value and flag for tagging mode
+
+        //
+        // // Function to display user list in an absolute div
+        // function displayMemberList(users) {
+        //     let memberList = '';
+        //     users.forEach(user => {
+        //         memberList += `<div class="user" data-name="${user.name}">${user.name}</div>`;
+        //     });
+        //     $('#memberList').html(memberList);
+        //     $('#memberList').show();
+        // }
+        //
+        // // Function to handle keyup event
+        // $(document).on('keyup', '#messageInput', function(event) {
+        //
+        //     if (event.key === '@') {
+        //         isTaggingMode = true;
+        //         searchValue = '@';
+        //
+        //         $.ajax({
+        //             url: '/chat-room/room/${roomId}/users',
+        //             type: 'GET',
+        //             data: { query: '' },
+        //             success: function(response) {
+        //                 displayMemberList(response.users);
+        //             },
+        //             error: function(xhr) {
+        //                 console.log(xhr.responseText);
+        //             }
+        //         });
+        //     } else if (isTaggingMode && event.key === ' ') {
+        //         isTaggingMode = false;
+        //         $('#memberList').hide();
+        //     } else if (isTaggingMode && event.key !== '@') {
+        //         searchValue += event.key;
+        //         // Call API to search for users based on searchValue
+        //         $.ajax({
+        //             url: '/chat-room/room/${roomId}/users',
+        //             type: 'GET',
+        //             data: { query: searchValue },
+        //             success: function(response) {
+        //                 displayMemberList(response.users);
+        //             },
+        //             error: function(xhr) {
+        //                 console.log(xhr.responseText);
+        //             }
+        //         });
+        //     }
+        // });
+        let searchValue = '';
+        let isTaggingMode = false;
+
+        // Bắt sự kiện click vào một người dùng từ danh sách
+        $(document).on('click', '.user', function() {
+            const selectedUserName = $(this).data('name');
+            const messageInput = $('#content');
+            const currentMessage = messageInput.val();
+            const atIndex = currentMessage.lastIndexOf('@');
+            const afterAt = currentMessage.slice(atIndex + searchValue.length);
+            messageInput.val('@'+ selectedUserName + ' ' + afterAt);
+            isTaggingMode = false;
+            $('#memberList').hide();
+        });
+
+        $(document).ready(function() {
+            const contentInput = document.getElementById('content');
+
+            // Bắt sự kiện khi người dùng gõ phím trong trường nhập tin nhắn
+            $(document).on('keyup', '#content', function(event) {
+                const inputValue = event.target.value;
+                const atIndex = inputValue.lastIndexOf('@');
+
+                if (event.key === '@' && !isTaggingMode) {
+                    isTaggingMode = true;
+                    const roomId = contentInput.dataset.roomId;
+                    searchValue = '@';
+                    displayMemberList(roomId);
+                } else if (event.key === ' ') {
+                    isTaggingMode = false;
+                    $('#memberList').hide();
+                } else if (atIndex !== -1 && !isTaggingMode) {
+                    isTaggingMode = true;
+                    searchValue = '';
+                }
+
+                if (isTaggingMode && event.key !== ' ' && atIndex !== -1) {
+                    searchValue += event.key;
+                    const roomId = contentInput.dataset.roomId;
+                    displayMemberList(roomId);
+
+                    const cursorPosition = atIndex + 1;
+
+                    $('#memberList').css({
+                        'left': (cursorPosition * 8) + 'px'
+                    });
+
+                    $('#memberList').show();
+                }
+            });
+        });
+
+        function displayMemberList(roomId) {
+            $.ajax({
+                url: `/chat-room/room/${roomId}/users`,
+                type: 'GET',
+                success: function(response) {
+                    let memberList = '';
+                    let topValue = 45;
+                    if (response.room.owner) {
+                        memberList += `<div class="user" class="flex items-center justify-between px-4 py-2 border-b border-gray-200" data-name="${response.room.owner.name}">${response.room.owner.name}</div>`;
+                    }
+                    response.users.forEach(user => {
+                        topValue += 20
+                        memberList += `<div class="user" class="flex items-center justify-between px-4 py-2 border-b border-gray-200" data-name="${user.name}">${user.name}</div>`;
+                    });
+                    topValue += 20
+                    memberList += `<div class="user" class="flex items-center justify-between px-4 py-2 border-b border-gray-200" data-name="All">@All</div>`;
+                    $('#memberList').css('top','-'+ topValue + 'px');
+                    $('#memberList').html(memberList);
+                    $('#memberList').show();
+                },
+                error: function(xhr) {
+                    // Xử lý lỗi khi yêu cầu AJAX thất bại
+                    console.log(xhr.responseText);
+                    alert('Error: Failed to retrieve member list.'); // Hiển thị thông báo lỗi (optional)
+                }
+            });
+        }
     </script>
 @endsection

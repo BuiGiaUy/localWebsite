@@ -16,4 +16,7 @@
     .message:hover .absolute {
         opacity: 100;
     }
+    #memberList {
+        /*top: -65px;*/
+    }
 </style>
