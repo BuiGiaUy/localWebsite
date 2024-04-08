@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSent;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,12 +14,15 @@ class MessageController
     {
 
         $input = $request->all();
+        $user = Auth::user();
 
         if (isset($input['content']) && strstr($input['content'], 'http://localwebsite.th/storage/')) {
             $type = 'image';
         }else {
             $type = 'text';
         }
+        event(new MessageSent($input["content"] ,$roomId));
+
         $message = Message::create([
             'chatRoomId' => $roomId,
             'user_id' => Auth::user()->id,
@@ -25,39 +30,29 @@ class MessageController
             'type' => $type,
         ]);
 
-//        echo '<pre>';
-//        print_r($input);
-//        print_r($type);
-//        echo '</pre>';
-//        exit();
-        return response()->json($message, 200);
+        return response()->json(["message" => $message,"user" => $user] , 200);
     }
-        public function editMessage(Request $request, $id)
+    public function editMessage(Request $request, $id)
     {
-        // Kiểm tra xem tin nhắn có tồn tại không
         $message = Message::find($id);
         if (!$message) {
-            return response()->json(['error' => 'Tin nhắn không tồn tại'], 404);
+            return response()->json(['error' => 'Message does not exist'], 404);
         }
 
-        // Kiểm tra xem người dùng có quyền chỉnh sửa tin nhắn hay không
-        // Ở đây, chúng ta giả sử rằng chỉ có người tạo tin nhắn mới có quyền chỉnh sửa
         if ($message->user_id != auth()->id()) {
-            return response()->json(['error' => 'Bạn không có quyền chỉnh sửa tin nhắn này'], 403);
+            return response()->json(['error' => 'You do not have permission to edit this message'], 403);
         }
 
-        // Kiểm tra và xác thực dữ liệu được gửi từ biểu mẫu
         $validatedData = $request->validate([
             'message_content' => 'required|string|max:255',
         ]);
 
-        // Cập nhật nội dung tin nhắn
         $message->content = $validatedData['message_content'];
         $message->save();
 
-        // Chuyển hướng hoặc trả về phản hồi thành công tùy thuộc vào yêu cầu
-        return redirect()->back()->with('success', 'Tin nhắn đã được cập nhật thành công');
+        return redirect()->back()->with('success', 'Message has been successfully updated');
     }
+
     public function deleteMessage($id)
     {
         try {

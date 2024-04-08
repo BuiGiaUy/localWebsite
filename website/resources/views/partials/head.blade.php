@@ -9,6 +9,7 @@
 
 <link rel="stylesheet" href="{{ asset('vendor/file-manager/css/file-manager.css') }}">
 <script src="{{ asset('vendor/file-manager/js/file-manager.js') }}"></script>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <style>
     .selected {
         font-weight: bold;

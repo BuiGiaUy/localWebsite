@@ -52,15 +52,16 @@ class ChatController extends BaseController
     }
     public function storeRoom(Request $request) {
         $input = $request->all();
-
+        // TODO: Create a new room
         $room = Room::create([
             'name' => $input['room_name'],
             'icon' => $input['room_icon'],
             'description' => $input['room_description'],
-            'owner_id' =>  Auth::user()->id,
+            'owner_id' => Auth::user()->id
         ]);
+        $message = "Created new Room";
 
-        return response()->json($room, 200);
+        return response()->json(["message" => $message, "room" => $room], 200);
     }
     public function getRoomUsers($id) {
         if ($id == null) {
@@ -87,10 +88,8 @@ class ChatController extends BaseController
             return response()->json(['error' => 'Room not found'], 404);
         }
 
-// Delete the room
         $room->delete();
 
-// Redirect the user to the index page with a success message
         return redirect()->route('room.index')->with('success', 'Room has been deleted successfully');
     }
     public function search(Request $request) {
@@ -123,4 +122,5 @@ class ChatController extends BaseController
 
         return response()->json(["message" =>$message, "room"=> $room], 200);
     }
+
 }

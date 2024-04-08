@@ -74,7 +74,7 @@
                 const room = response.room;
 
                 if (!room) return
-                const html =`<a href="#" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
+                const html =`<button data-room-id="${room[i].id}" class="w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
                             <div class="col-span-1">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
@@ -86,9 +86,9 @@
                             <div class="col-span-2">
                                 <p> ${room.description}</p>
                             </div>
-                        </a>`
+                        </button>`
                 const joinedRoomList = document.getElementById("joined_rooms_list")
-                if (joinedRoomList) joinedRoomList.innerHTML +=html;
+                if (joinedRoomList) joinedRoomList.append(html) ;
 
                 const searchRoomResultElement = document.getElementById("search-room-result-"+room.id);
                 if (searchRoomResultElement) searchRoomResultElement.remove();
@@ -111,14 +111,13 @@
                     let html = '';
                     for(let i=0; i<rooms.length; i++){
                         html +=
-                            `<button data-room-id="${room[i].id}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2" id="search-room-result-${rooms[i].id}">
+                            `<a href="" id="search-room-result-${rooms[i].id}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg flex justify-between items-center gap-2" id="search-room-result-${rooms[i].id}">
                                 <div class="flex justify-start items-center gap-4">
                                     <div class="w-8 h-8 rounded-full">
                                         <img src="${rooms[i].icon ?? 'images/avatar.jpg'}" alt="avatar" class="w-full h-full rounded-full border-2 border-red-500" />
                                     </div>
                                     <p class="font-bold text-white">${rooms[i].name}</p>
                                 </div>
-
                                 <div class="">
                                     <button type="button" class="text-white hover:text-orange-500 text-xl" onclick="sendJoinRoomRequest(${rooms[i].id})">
                                         <i class="fa-solid fa-right-to-bracket"></i>

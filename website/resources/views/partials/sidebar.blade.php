@@ -1,5 +1,6 @@
-<div class="w-full py-8 px-4">
-    <div class="flex justify-start items-center gap-4">
+<div class="w-full py-8 px-4 ">
+
+    <div class="flex justify-start items-center relative gap-4">
         <div class="w-12 h-12 rounded-full">
             @include('components.avatar', ['avatar_path' => 'images/avatar.jpg'])
         </div>
@@ -10,6 +11,11 @@
                 <p>{{Auth::user()->name}}</p>
             @endguest
         </div>
+        <button onclick="showNotificationModal('New Notification', 'This is a new notification!')" class="absolute  right-0">
+            <div class=" w-6 h-6 bg-red-500 rounded-full flex justify-center items-center text-white font-bold">1</div>
+        </button>
+        @include('components.modals.notificationModal')
+
     </div>
 </div>
 <!-- Navigation  menus -->
@@ -52,3 +58,14 @@
         @csrf
     </form>
 </div>
+<script>
+    function showNotificationModal(title, content) {
+        document.getElementById('notificationContent').innerText = content;
+        document.getElementById('notificationModal').classList.remove('hidden');
+    }
+
+    // Đóng modal
+    function closeNotificationModal() {
+        document.getElementById('notificationModal').classList.add('hidden');
+    }
+</script>

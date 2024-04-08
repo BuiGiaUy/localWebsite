@@ -23,7 +23,7 @@
             </div>
             <div class="w-ful pl-4 mt-12">
                 <p class="font-semibold">My rooms</p>
-                <div class="w-full" id="createRoomForm">
+                <div class="w-full" id="rooms_list">
                     @foreach($rooms as $room)
                         <button data-room-id="{{ $room->id }}" class="room-button w-full bg-[#262948] hover:bg-[#4289f3] py-3 px-4 my-4 rounded-lg grid grid-cols-3 gap-2 relative">
                             <div class="col-span-1">
@@ -117,6 +117,7 @@
                     </div>
                 </div>
                 <div class="text-center w-full row-span-1" id="link_room">
+
 {{--                    <a href="#" class="mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>--}}
                 </div>
             </div>
@@ -125,7 +126,6 @@
     <!-- add New Room Form Modal -->
     @include('components.modals.roomFormModal')
     @include('components.modals.searchRoomModal')
-
     <!-- Import CDN jquery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -147,6 +147,7 @@
                         // Handle the success response
                         turnOnNotification(response.message, "success");
                         const room = response.room;
+                        console.log(response)
                         if (!room)  return;
 
                         if (room.icon === null){
@@ -235,7 +236,7 @@
                             <button onclick="exitRoom(${response.room.id})" class="text-white ml-4 focus:outline-none text-xl"><i class="fa-solid fa-right-from-bracket"></i></button>
                         `
                         linkRoom = `
-                            <button data-room-chat-id="${response.room.id}"  class="btn-link-room mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
+                            <a href="/chat-room/chat/${response.room.id}"  class="btn-link-room mx-auto inline-block px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">Open Chat</a>
                         `
 
                         if (response.room.owner) {
@@ -282,27 +283,11 @@
                     }
                 });
             }
-            $('#link_room').on('click', '.btn-link-room', function() {
-                let roomId = $(this).data('room-chat-id');
-                console.log(roomId)
-                $.ajax({
-                    url:`/chat-room/chat/${roomId}`,
-                    type: 'GET',
-                    success: function (response) {
-                        console.log(response)
-                        window.location.href = `/chat-room/chat/${roomId}`;
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
-                })
 
-            })
         });
     </script>
     <script>
         function exitRoom(roomId) {
-
 
             console.log(roomId)
             $.ajax({
@@ -321,4 +306,6 @@
             });
         }
     </script>
+{{--    NotificationModal--}}
+
 @endsection

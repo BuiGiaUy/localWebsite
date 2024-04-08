@@ -14,15 +14,15 @@
         addNewRoomFormModal.classList.remove('visible');
         addNewRoomFormModal.classList.add('hidden');
     }
-    function turnOnNotification(message, type) {
-        const notificationElement = document.getElementById('notification-'+ type);
-        const notificationMessageElement = document.getElementById('notification-'+ type +'-message');
+    function turnOnNotification(message, type){
+        const notificationElement = document.getElementById('notification-'+type);
+        const notificationMessageElement = document.getElementById('notification-'+type+'-message');
         notificationMessageElement.innerText = message;
-        notificationElement.classList.remove('hidden')
-        notificationElement.classList.add('visible')
-        setTimeout(function () {
-            notificationElement.classList.remove('visible')
-            notificationElement.classList.add('hidden')
-        },3000)
+        notificationElement.classList.remove('hidden');
+        notificationElement.classList.add('visible');
+        setTimeout(function(){
+            notificationElement.classList.remove('visible');
+            notificationElement.classList.add('hidden');
+        }, 3000);
     }
 </script>
