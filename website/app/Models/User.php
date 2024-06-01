@@ -55,5 +55,13 @@ class User extends Authenticatable
         và khóa ngoại của bảng room_user là user_id và room_id */
         return $this->belongsToMany(Room::class, 'room_user', 'user_id', 'room_id');
     }
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'user_id', 'id');
+    }
+    public function notifications() :HasMany
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id');
+    }
 
 }

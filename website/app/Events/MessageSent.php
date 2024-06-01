@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,12 +16,14 @@ class MessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $message;
+    public Message $message;
+    public User $user;
     public int $roomId;
 
-    public function __construct($message, $roomId)
+    public function __construct(Message $message, User $user ,$roomId)
     {
         $this->message = $message;
+        $this->user = $user;
         $this->roomId = $roomId;
     }
 

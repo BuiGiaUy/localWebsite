@@ -14,14 +14,14 @@ class MessageController
     {
 
         $input = $request->all();
-        $user = Auth::user();
+        $user = User::find(Auth::id());
 
         if (isset($input['content']) && strstr($input['content'], 'http://localwebsite.th/storage/')) {
             $type = 'image';
         }else {
             $type = 'text';
         }
-        event(new MessageSent($input["content"] ,$roomId));
+
 
         $message = Message::create([
             'chatRoomId' => $roomId,
@@ -30,7 +30,9 @@ class MessageController
             'type' => $type,
         ]);
 
-        return response()->json(["message" => $message,"user" => $user] , 200);
+        event(new MessageSent($message, $user, $roomId));
+
+        return response()->json(["message" => $message, "user" => $user] , 200);
     }
     public function editMessage(Request $request, $id)
     {

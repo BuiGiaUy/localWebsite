@@ -2,53 +2,65 @@
 
 namespace App\Notifications;
 
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ChatNotification extends Notification
+class NewMessageNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $notificationCount;
+
     /**
      * Create a new notification instance.
+     *
+     * @param int $notificationCount
+     * @return void
      */
-    public function __construct()
+    public function __construct($notificationCount)
     {
-        //
+        $this->notificationCount = $notificationCount;
     }
 
     /**
      * Get the notification's delivery channels.
      *
-     * @return array<int, string>
+     * @param  mixed  $notifiable
+     * @return array
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return $notifiable->prefers_sms ? ['vonage'] : ['mail', 'database'];
+        return ['mail'];
     }
 
     /**
      * Get the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('You have received a new message.')
+            ->action('View Message', url('/messages'))
+            ->line('You have ' . $this->notificationCount . ' unread notifications.');
     }
 
     /**
      * Get the array representation of the notification.
      *
-     * @return array<string, mixed>
+     * @param  mixed  $notifiable
+     * @return array
      */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable)
     {
         return [
-            //
+            // Data for database notifications
         ];
     }
 }

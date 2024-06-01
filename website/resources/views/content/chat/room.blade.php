@@ -189,10 +189,16 @@
         var pusher = new Pusher('3f38ceb0d245653f7b14', {
             cluster: 'ap1'
         });
-
         var channel = pusher.subscribe('channel-'+ room_id);
         channel.bind('chat-event', function(data) {
-            alert(JSON.stringify(data));
+            console.log(data.user.id)
+            console.log({{ Auth::user()->id}})
+
+            if (data.user.id !== {{ Auth::user()->id}}) {
+                // alert(JSON.stringify(data));
+                appendMessageEvent(data.message,data.user)
+            }
+
         });
     </script>
     <script>
@@ -206,79 +212,7 @@
                     data: $('#messageForm').serialize(),
                     success: function(response) {
                         console.log(response)
-
-                        let message = response.message;
-                        let html = '';
-
-                        if (message.user_id === response.user.id) {
-                            // Tin nhắn của bạn
-                            html +=
-                                `<div class="flex items-center bg-white p-4  border-b relative" data-message-id="${message.id}">
-                                    <div class="ml-3 flex-grow text-right pr-2">
-                                        <div class="text-sm text-gray-800 font-semibold">Bạn</div>`;
-                            if (message.type === 'image') {
-                                html += `<img src="${message.content}" alt="Tin nhắn ảnh">`;
-                            } else if (message.type === 'text') {
-                                html += `<div class="text-gray-600">${message.content}</div>`;
-                            }
-                            html +=
-                                `</div>
-                                        <div class="flex-shrink-0">
-                                            <div class="w-8 h-8 rounded-full">
-                                                <img src="{{asset('images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full"/>
-                                            </div>
-                                        </div>
-                                        <!-- Context menu -->
-                                        <div class="absolute left-0 top-1/4 w-1/4 ">
-                                            <div>
-                                                <div id="context-menu-${message.id}" class="z-30 hidden absolute bg-white border rounded shadow-lg">
-                                                        <button class="absolute top-0 right-0 px-3 py-2" onclick="toggleContextMenu('${message.id}')">
-                                                            <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
-                                                                <path d="M6 18L18 6M6 6l12 12"></path>
-                                                            </svg>
-                                                        </button>
-                                                        <ul class="divide-y divide-gray-200 ">
-                                                            <li>
-                                                                <button onclick="openModal('editMessageModal${message.id}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Edit Message</button>
-                                                            </li>
-                                                            <li>
-                                                                <a  onclick="openModal('deleteConfirmationModal${message.id}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Delete Message</a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <div id="overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-10 z-20 hidden" onclick="toggleContextMenu('${message.id}')" ></div>
-                                                </div>
-                                                <button class="focus:outline-none" onclick="toggleContextMenu('${message.id}')">
-                                                    <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
-                                                        <path d="M12 5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                        } else {
-                            // Tin nhắn đến
-                            html +=
-                                `<div class="flex items-center bg-white p-4 border-b">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-8 h-8 rounded-full">
-                                               <img src="{{asset('images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full"/>
-                                            </div>
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm text-gray-800 font-semibold">${response.user.name}</div>
-                                    `;
-                            if (message.type === 'image') {
-                                html += `<img src="${message.content}" alt="Tin nhắn ảnh">`;
-                            } else if (message.type === 'text') {
-                                html += `<div class="text-gray-600">${message.content}</div>`;
-                            }
-                            html +=
-                                `</div>
-                            </div>`;
-                        }
-                        console.log(html)
-                        $('#message').append(html);
+                        appendMessageSubmit(response.message, response.user)
                     },
                     error: function(error) {
                         console.log(error);
@@ -417,10 +351,14 @@
         $(document).on('click', '.user', function() {
             const selectedUserName = $(this).data('name');
             const messageInput = $('#content');
-            const currentMessage = messageInput.val();
+            const messageInputVal = messageInput.val(); // Gọi phương thức val() để lấy giá trị
+            const currentMessage = messageInputVal;
             const atIndex = currentMessage.lastIndexOf('@');
-            const afterAt = currentMessage.slice(atIndex + searchValue.length);
-            messageInput.val('@'+ selectedUserName + ' ' + afterAt);
+            if (atIndex !== -1) {
+                searchValue = currentMessage.slice(atIndex + 1, currentMessage.length);
+            }
+            const afterAt = currentMessage.slice(atIndex+1 + searchValue.length);
+            messageInput.val(messageInputVal + selectedUserName + ' ' + afterAt);
             isTaggingMode = false;
             $('#memberList').hide();
         });
@@ -507,6 +445,86 @@
                     console.error(xhr.responseText);
                 }
             });
+        }
+    </script>
+    <script>
+        function appendMessageSubmit(message, user) {
+            let html = '';
+
+            if (message.user_id === {{ Auth::user()->id}}) {
+                // Tin nhắn của bạn
+                html +=
+                    `<div class="flex items-center bg-white p-4 border-b relative" data-message-id="${message.id}">
+                <div class="ml-3 flex-grow text-right pr-2">
+                    <div class="text-sm text-gray-800 font-semibold">Bạn</div>`;
+                if (message.type === 'image') {
+                    html += `<img src="${message.content}" alt="Tin nhắn ảnh">`;
+                } else if (message.type === 'text') {
+                    html += `<div class="text-gray-600">${message.content}</div>`;
+                }
+                html +=
+                    `</div>
+            <div class="flex-shrink-0">
+                <div class="w-8 h-8 rounded-full">
+                    <img src="{{asset('images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full"/>
+                </div>
+            </div>
+            <!-- Context menu -->
+            <div class="absolute left-0 top-1/4 w-1/4 ">
+                <div>
+                    <div id="context-menu-${message.id}" class="z-30 hidden absolute bg-white border rounded shadow-lg">
+                        <button class="absolute top-0 right-0 px-3 py-2" onclick="toggleContextMenu('${message.id}')">
+                            <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <ul class="divide-y divide-gray-200 ">
+                            <li>
+                                <button onclick="openModal('editMessageModal${message.id}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Edit Message</button>
+                            </li>
+                            <li>
+                                <a onclick="openModal('deleteConfirmationModal${message.id}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">Delete Message</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="overlay" class="fixed top-0 left-0 w-full h-full bg-black opacity-10 z-20 hidden" onclick="toggleContextMenu('${message.id}')" ></div>
+                </div>
+                <button class="focus:outline-none" onclick="toggleContextMenu('${message.id}')">
+                    <svg class="w-6 h-6 fill-current text-gray-500 hover:text-gray-700" viewBox="0 0 24 24">
+                        <path d="M12 5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                </button>
+            </div>
+            </div>
+        </div>
+        `;
+
+                $('#message').append(html);
+            }
+
+        }
+
+        function appendMessageEvent(message, user) {
+            let html = ''
+            html +=
+                `                        <div class="ml-3 flex-grow text-right pr-2">
+                            <div class="flex items-center bg-white p-4 border-b">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full">
+                                        <img src="{{asset('images/avatar.jpg')}}" alt="avatar" class="w-full h-full rounded-full"/>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                            <div class="text-sm text-gray-800 font-semibold">${user.name}</div>`;
+            if (message.type === 'image') {
+                html += `<img src="${message.content}" alt="Tin nhắn ảnh">`;
+            } else if (message.type === 'text') {
+                html += `<div class="text-gray-600">${message.content}</div>`;
+            }
+
+            html +=
+                `</div>`;
+            $('#message').append(html);
         }
     </script>
 @endsection
